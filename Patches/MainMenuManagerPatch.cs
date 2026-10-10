@@ -1,16 +1,15 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
-
-using TMPro;
-using HarmonyLib;
-using UnityEngine;
 using AmongUs.Data;
 using Assets.InnerNet;
-
-using TownOfHost.Templates;
-using Object = UnityEngine.Object;
+using HarmonyLib;
+using TMPro;
+using TownOfHost.Addons;
 using TownOfHost.Modules;
-using System.Linq;
+using TownOfHost.Templates;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace TownOfHost
 {
@@ -32,9 +31,11 @@ namespace TownOfHost
         private static SimpleButton TOHPBOTButton;
         private static SimpleButton RoleInfoButton;
         private static SimpleButton betaversionchange;
+        private static SimpleButton AddonButton;
         public static TextMeshPro Statistics_TMP;
         public static GameObject VersionMenu;
         public static GameObject betaVersionMenu;
+        public static GameObject AddonPanel;
         public static AnnouncementPopUp updatea;
 
         [HarmonyPatch(nameof(MainMenuManager.Start)), HarmonyPostfix, HarmonyPriority(Priority.Normal)]
@@ -106,7 +107,7 @@ namespace TownOfHost
             {
                 StatisticsButton = CreateButton(
                     "StatisticsButton",
-                    new Vector3(0, -2.6963f, -5f),
+                    new Vector3(-0.63f, -2.6963f, -5f),
                     new(255, 242, 104, byte.MaxValue),
                     new(255, 248, 173, byte.MaxValue),
                     () =>
@@ -139,6 +140,25 @@ namespace TownOfHost
                 var Scroller = Statistics_ScrollStuff.transform.GetChild(0);
                 Scroller.GetChild(3).DestroyChildren();//inner全削除
                 Statistics_ScrollStuff.gameObject.SetActive(false);
+            }
+
+            // アドオンボタン
+            if (SimpleButton.IsNullOrDestroyed(AddonButton))
+            {
+                AddonButton = CreateButton(
+                    "AddonButton",
+                    new(0.9f, -2.6963f, -5f),
+                    new(180, 180, 255, byte.MaxValue),
+                    new(210, 210, 255, byte.MaxValue),
+                    () =>
+                    {
+                        CredentialsPatch.TOHPLogo.gameObject.SetActive(false);
+                        __instance.screenTint.enabled = true;
+
+                        AddonMenu.OpenMenu(__instance);
+                    },
+                    "Addon"
+                );
             }
 
             //Updateボタンを生成
@@ -245,6 +265,7 @@ namespace TownOfHost
                     Translator.GetString("versionchangebutton"));
                 betaversionchange.FontSize = 2;
             }
+            AddonMenu.CreateMenu(__instance);
             CreateStreameMenu.CreateMenu(__instance);
             CancelAutoCreateGame();
             __instance.PlayOnlineButton.OnClick.AddListener((Action)RequestAutoCreateGame);
